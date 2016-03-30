@@ -5027,7 +5027,17 @@ static inline int __energy_diff(struct energy_env *eenv)
 {
 	struct sched_domain *sd;
 	struct sched_group *sg;
-	int sd_cpu = -1;
+	int sd_cpu = -1, energy_before = 0, energy_after = 0;
+	int diff, margin;
+
+	struct energy_env eenv_before = {
+		.util_delta	= 0,
+		.src_cpu	= eenv->src_cpu,
+		.dst_cpu	= eenv->dst_cpu,
+		.nrg		= { 0, 0, 0, 0},
+		.cap		= { 0, 0, 0 },
+	};
+
 
 	if (eenv->src_cpu == eenv->dst_cpu)
 		return 0;
@@ -5054,7 +5064,17 @@ static inline int __energy_diff(struct energy_env *eenv)
 	trace_sched_energy_diff(eenv);
 	trace_sched_energy_perf_deltas(eenv);
 
-	return eenv->nrg_delta;
+	/*
+	 * Dead-zone margin preventing too many migrations.
+	 */
+
+	margin = eenv->nrg.before >> 6; /* ~1.56% */
+
+	diff = eenv->nrg.after - eenv->nrg.before;
+
+	eenv->nrg.diff = (abs(diff) < margin) ? 0 : eenv->nrg.diff;
+
+	return eenv->nrg.diff;
 }
 
 #ifdef CONFIG_SCHED_TUNE
