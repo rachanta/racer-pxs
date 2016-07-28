@@ -4107,7 +4107,12 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	}
 
 
+	/* Update SchedTune accouting */
+	schedtune_enqueue_task(p, cpu_of(rq));
+
+
 #endif /* CONFIG_SMP */
+
 	hrtick_update(rq);
 }
 
@@ -4199,6 +4204,10 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 				update_capacity_of(cpu_of(rq), false);
 		}
 	}
+
+
+	/* Update SchedTune accouting */
+	schedtune_dequeue_task(p, cpu_of(rq));
 
 
 #endif /* CONFIG_SMP */
