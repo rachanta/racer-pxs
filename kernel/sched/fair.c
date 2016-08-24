@@ -4069,13 +4069,13 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 #ifdef CONFIG_SMP
 
 	/*
-	 * Update SchedTune accouting.
+	 * Update SchedTune accounting.
 	 *
 	 * We do it before updating the CPU capacity to ensure the
 	 * boost value of the current task is accounted for in the
 	 * selection of the OPP.
 	 *
-	 * We do it also in the case where we enqueue a trottled task;
+	 * We do it also in the case where we enqueue a throttled task;
 	 * we could argue that a throttled task should not boost a CPU,
 	 * however:
 	 * a) properly implementing CPU boosting considering throttled
@@ -4105,9 +4105,6 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 		if (task_new || task_wakeup)
 			update_capacity_of(cpu_of(rq), true);
 	}
-
-	/* Update SchedTune accouting */
-	schedtune_enqueue_task(p, cpu_of(rq));
 
 
 #endif /* CONFIG_SMP */
@@ -4177,7 +4174,7 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 #ifdef CONFIG_SMP
 
 	/*
-	 * Update SchedTune accouting
+	 * Update SchedTune accounting
 	 *
 	 * We do it before updating the CPU capacity to ensure the
 	 * boost value of the current task is accounted for in the
@@ -4203,9 +4200,6 @@ static void dequeue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 				update_capacity_of(cpu_of(rq), false);
 		}
 	}
-
-	/* Update SchedTune accouting */
-	schedtune_dequeue_task(p, cpu_of(rq));
 
 
 #endif /* CONFIG_SMP */
