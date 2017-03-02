@@ -406,10 +406,11 @@ KBUILD_CFLAGS   := -Werror -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -Wno-misleading-indentation \
 		   -Wno-maybe-uninitialized \
-		   -std=gnu89
 		   -fno-delete-null-pointer-checks \
 		   -std=gnu89 \
-		   -Wno-unused-const-variable
+		   -Wno-unused-const-variable \
+		   -Wno-bool-compare \
+		   -fmodulo-sched -fmodulo-sched-allow-regmoves
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
