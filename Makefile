@@ -405,6 +405,7 @@ KBUILD_CFLAGS   := -Werror -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Werror-implicit-function-declaration \
 		   -Wno-format-security \
 		   -Wno-misleading-indentation \
+		   -Wno-maybe-uninitialized \
 		   -std=gnu89
 
 KBUILD_AFLAGS_KERNEL :=
