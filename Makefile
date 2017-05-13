@@ -412,6 +412,7 @@ KBUILD_CFLAGS   := -Werror -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-unused-const-variable \
 		   -Wno-bool-compare \
 		   -Wno-return-local-addr \
+                   -Wno-discarded-array-qualifiers \
 		   -fmodulo-sched -fmodulo-sched-allow-regmoves
 
 KBUILD_AFLAGS_KERNEL :=
