@@ -410,6 +410,7 @@ KBUILD_CFLAGS   := -Werror -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -std=gnu89 \
 		   -Wno-unused-const-variable \
 		   -Wno-unused-variable \
+                   -Wno-unused-function \
 		   -Wno-bool-compare \
 		   -Wno-return-local-addr \
                    -Wno-discarded-array-qualifiers \
