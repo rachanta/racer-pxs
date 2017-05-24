@@ -5347,7 +5347,6 @@ static inline int __energy_diff(struct energy_env *eenv)
 	struct sched_domain *sd;
 	struct sched_group *sg;
 	int sd_cpu = -1, energy_before = 0, energy_after = 0;
-	int diff, margin;
 
 	struct energy_env eenv_before = {
 		.util_delta	= 0,
@@ -5357,41 +5356,45 @@ static inline int __energy_diff(struct energy_env *eenv)
 		.cap		= { 0, 0, 0 },
 	};
 
-
 	if (eenv->src_cpu == eenv->dst_cpu)
 		return 0;
 
 	sd_cpu = (eenv->src_cpu != -1) ? eenv->src_cpu : eenv->dst_cpu;
 	sd = rcu_dereference(per_cpu(sd_ea, sd_cpu));
+
 	if (!sd)
 		return 0; /* Error */
 
 	sg = sd->groups;
+
 	do {
-		if (!cpu_in_sg(sg, eenv->src_cpu) &&
-		    !cpu_in_sg(sg, eenv->dst_cpu))
-			continue;
+		if (cpu_in_sg(sg, eenv->src_cpu) || cpu_in_sg(sg, eenv->dst_cpu)) {
+			eenv_before.sg_top = eenv->sg_top = sg;
 
-		eenv->sg_top = sg;
-		if (sched_group_energy(eenv))
-			return 0; /* Invalid result abort */
+			if (sched_group_energy(&eenv_before))
+				return 0; /* Invalid result abort */
+			energy_before += eenv_before.energy;
 
+			/* Keep track of SRC cpu (before) capacity */
+			eenv->cap.before = eenv_before.cap.before;
+			eenv->cap.delta = eenv_before.cap.delta;
+
+			if (sched_group_energy(eenv))
+				return 0; /* Invalid result abort */
+			energy_after += eenv->energy;
+		}
 	} while (sg = sg->next, sg != sd->groups);
 
-	__update_perf_energy_deltas(eenv);
+	eenv->nrg.before = energy_before;
+	eenv->nrg.after = energy_after;
+	eenv->nrg.diff = eenv->nrg.after - eenv->nrg.before;
+	eenv->payoff = 0;
 
-	trace_sched_energy_diff(eenv);
-	trace_sched_energy_perf_deltas(eenv);
-
-	/*
-	 * Dead-zone margin preventing too many migrations.
-	 */
-
-	margin = eenv->nrg.before >> 6; /* ~1.56% */
-
-	diff = eenv->nrg.after - eenv->nrg.before;
-
-	eenv->nrg.diff = (abs(diff) < margin) ? 0 : eenv->nrg.diff;
+	trace_sched_energy_diff(eenv->task,
+			eenv->src_cpu, eenv->dst_cpu, eenv->util_delta,
+			eenv->nrg.before, eenv->nrg.after, eenv->nrg.diff,
+			eenv->cap.before, eenv->cap.after, eenv->cap.delta,
+			eenv->nrg.delta, eenv->payoff);
 
 	return eenv->nrg.diff;
 }
@@ -5435,7 +5438,7 @@ normalize_energy(int energy_diff)
 static inline int
 energy_diff(struct energy_env *eenv)
 {
-	int boost;
+	int boost = schedtune_task_boost(eenv->task);
 	int nrg_delta;
 
 
