@@ -1058,6 +1058,7 @@ struct energy_env {
 
 	int			src_cpu;
 	int			dst_cpu;
+	int			energy;
 	int			util_delta;
 	struct task_struct	*task;
 
@@ -1075,6 +1076,20 @@ struct energy_env {
 		int delay_idx;
 		int perf_idx;
 	} before, after;
+
+struct {
+		int before;
+		int after;
+		int delta;
+		int diff;
+	} nrg;
+	struct {
+		int before;
+		int after;
+		int delta;
+	} cap;
+
+
 };
 
 #define SDTL_OVERLAP	0x01
