@@ -5431,10 +5431,6 @@ normalize_energy(int energy_diff)
 	return (energy_diff < 0) ? -normalized_nrg : normalized_nrg;
 }
 
-static inline bool filter_energy(void)
-{
-	return sched_feat(ENERGY_FILTER);
-}
 
 static inline int
 energy_diff(struct energy_env *eenv)
@@ -5443,21 +5439,17 @@ energy_diff(struct energy_env *eenv)
 	int nrg_delta;
 
 
-	/* Conpute "absolute" energy diff */
+/* Conpute "absolute" energy diff */
 	__energy_diff(eenv);
-	if (!filter_energy())
-		return eenv->nrg_delta;
 
 	/* Return energy diff when boost margin is 0 */
-
-#ifdef CONFIG_CGROUP_SCHEDTUNE
-	boost = schedtune_task_boost(eenv->task);
-#else
-	boost = get_sysctl_sched_cfs_boost();
-#endif
-
 	if (boost == 0)
-		return eenv->nrg_delta;
+		return eenv->nrg.diff;
+
+	/* Compute normalized energy diff */
+	nrg_delta = normalize_energy(eenv->nrg.diff);
+	eenv->nrg.delta = nrg_delta;
+
 
 	eenv->payoff = schedtune_accept_deltas(
 			eenv->nrg_delta,
