@@ -5574,7 +5574,7 @@ static inline unsigned long task_util(struct task_struct *p)
 }
 
 
-static inline unsigned long boosted_task_util(struct task_struct *task);
+unsigned long boosted_task_util(struct task_struct *task);
 
 static inline bool __task_fits(struct task_struct *p, int cpu, int util)
 {
@@ -5700,7 +5700,7 @@ boosted_cpu_util(int cpu)
 	return util + margin;
 }
 
-static inline unsigned long
+unsigned long
 boosted_task_util(struct task_struct *task)
 {
 	unsigned long util = task_util(task);
